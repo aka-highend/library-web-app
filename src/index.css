@@ -1,0 +1,51 @@
+table {
+  width: 100%;
+  table-layout: auto;
+  word-wrap: break-word;
+}
+
+@media (max-width: 576px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .form-control,
+  .btn,
+  .nav-link {
+    font-size: 0.9rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .table-responsive {
+    overflow-x: hidden;
+  }
+
+  .form-control,
+  .btn,
+  .nav-link {
+    font-size: 1rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
