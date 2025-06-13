@@ -1,24 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const initialBooks = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    category: "Fiction",
-    publishing_year: 2020,
-    author: "F. Scott Fitzgerald",
-  },
-  {
-    id: 2,
-    title: "1984",
-    category: "Dystopian",
-    publishing_year: 2015,
-    author: "George Orwell",
-  },
-];
+import { apiUrl } from "../utils/constants";
 
 const BookList = () => {
-  const [books, setBooks] = useState(initialBooks);
+  const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({
     title: "",
@@ -30,6 +15,26 @@ const BookList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const fetchBooks = () => {
+    fetch(`${apiUrl}/books`)
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((book) => ({
+          id: book.id,
+          title: book.title,
+          category: book.category,
+          publishing_year: book.publishingYear,
+          author: book.author || "Unknown",
+        }));
+        setBooks(formatted);
+      })
+      .catch((err) => console.error("Failed to fetch books:", err));
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
   const filteredBooks = books.filter((b) =>
     b.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -38,6 +43,50 @@ const BookList = () => {
     currentPage * itemsPerPage
   );
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const payload = {
+  //     title: formData.title,
+  //     category: formData.category,
+  //     publishingYear: parseInt(formData.publishing_year),
+  //     author: {
+  //       id: parseInt(formData.author),
+  //     },
+  //   };
+
+  //   try {
+  //     if (editingId) {
+  //       // PUT update
+  //       const response = await fetch(`${apiUrl}/books/${editingId}`, {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
+  //       if (!response.ok) throw new Error("Failed to update book");
+  //     } else {
+  //       // POST add
+  //       const response = await fetch(`${apiUrl}/books`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
+  //       if (!response.ok) throw new Error("Failed to add book");
+  //     }
+
+  //     // Refresh book list
+  //     fetchBooks();
+  //     setFormData({ title: "", category: "", publishing_year: "", author: "" });
+  //     setEditingId(null);
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //   }
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,7 +109,17 @@ const BookList = () => {
     setEditingId(book.id);
   };
 
-  const handleDelete = (id) => setBooks(books.filter((b) => b.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/books/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete book");
+      fetchBooks();
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    }
+  };
 
   return (
     <div>
