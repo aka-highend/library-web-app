@@ -20,7 +20,7 @@ const BookList = () => {
     fetch(`${apiUrl}/books`)
       .then((res) => res.json())
       .then((data) => {
-        const formatted = data.map((book) => ({
+        const formattedBook = data.map((book) => ({
           id: book?.id,
           title: book?.title,
           category: book?.category,
@@ -28,7 +28,7 @@ const BookList = () => {
           author: book?.author || "Unknown",
           authorId: book?.authorId || (book?.author && book?.author.id),
         }));
-        setBooks(formatted);
+        setBooks(formattedBook);
       })
       .catch((err) => console.error("Failed to fetch books:", err));
   };
@@ -83,7 +83,7 @@ const BookList = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to submit");
+      if (!response.ok) throw new Error("Failed to submit new book");
 
       await fetchBooks();
       setFormData({
@@ -113,6 +113,7 @@ const BookList = () => {
       const response = await fetch(`${apiUrl}/books/${id}`, {
         method: "DELETE",
       });
+
       if (!response.ok) throw new Error("Failed to delete book");
       fetchBooks();
     } catch (error) {

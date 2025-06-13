@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const initialAuthors = [
-  { id: 1, name: "F. Scott Fitzgerald" },
-  { id: 2, name: "George Orwell" },
-];
+import { apiUrl } from "../utils/constants";
 
 const AuthorList = () => {
-  const [authors, setAuthors] = useState(initialAuthors);
+  const [authors, setAuthors] = useState([]);
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({ name: "" });
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const fetchAuthors = () => {
+    fetch(`${apiUrl}/authors`)
+      .then((res) => res.json())
+      .then((data) => {
+        const formattedAuthor = data.map((author) => ({
+          id: author?.id,
+          name: author?.name,
+        }));
+        setAuthors(formattedAuthor);
+      })
+      .catch((err) => console.error("Failed to fetch authors:", err));
+  };
+
+  useEffect(() => {
+    fetchAuthors();
+  }, []);
 
   const filtered = authors.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
@@ -22,27 +36,54 @@ const AuthorList = () => {
   );
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setAuthors(
-        authors.map((a) =>
-          a.id === editingId ? { ...formData, id: editingId } : a
-        )
+
+    const requestBody = {
+      name: formData.name,
+    };
+
+    try {
+      const response = await fetch(
+        `${apiUrl}/authors${editingId ? `/${editingId}` : ""}`,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
       );
-    } else {
-      setAuthors([...authors, { ...formData, id: authors.length + 1 }]);
+
+      if (!response.ok) throw new Error("Failed to submit new author");
+
+      await fetchAuthors();
+      setFormData({ name: "" });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error submitting author: ", error);
     }
-    setFormData({ name: "" });
-    setEditingId(null);
   };
 
   const handleEdit = (author) => {
-    setFormData(author);
-    setEditingId(author.id);
+    setFormData({
+      name: author?.name,
+    });
+    setEditingId(author?.id);
   };
 
-  const handleDelete = (id) => setAuthors(authors.filter((a) => a.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/authors/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete author");
+      fetchAuthors();
+    } catch (error) {
+      console.error("Error deleting author: ", error);
+    }
+  };
 
   return (
     <div>
