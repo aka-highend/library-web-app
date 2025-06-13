@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { apiUrl } from "../utils/constants";
 
 const BookList = () => {
+  const [authors, setAuthors] = useState([]);
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({
@@ -20,11 +21,12 @@ const BookList = () => {
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((book) => ({
-          id: book.id,
-          title: book.title,
-          category: book.category,
-          publishing_year: book.publishingYear,
-          author: book.author || "Unknown",
+          id: book?.id,
+          title: book?.title,
+          category: book?.category,
+          publishing_year: book?.publishingYear,
+          author: book?.author || "Unknown",
+          authorId: book?.authorId || (book?.author && book?.author.id),
         }));
         setBooks(formatted);
       })
@@ -33,6 +35,10 @@ const BookList = () => {
 
   useEffect(() => {
     fetchBooks();
+    fetch(`${apiUrl}/authors`)
+      .then((res) => res.json())
+      .then((data) => setAuthors(data))
+      .catch((err) => console.error("Failed to fetch authors:", err));
   }, []);
 
   const filteredBooks = books.filter((b) =>
@@ -44,69 +50,62 @@ const BookList = () => {
   );
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
+  const matchedAuthor = authors.find(
+    (a) => a.name.toLowerCase() === formData.author.toLowerCase()
+  );
 
-  //   const payload = {
-  //     title: formData.title,
-  //     category: formData.category,
-  //     publishingYear: parseInt(formData.publishing_year),
-  //     author: {
-  //       id: parseInt(formData.author),
-  //     },
-  //   };
-
-  //   try {
-  //     if (editingId) {
-  //       // PUT update
-  //       const response = await fetch(`${apiUrl}/books/${editingId}`, {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(payload),
-  //       });
-  //       if (!response.ok) throw new Error("Failed to update book");
-  //     } else {
-  //       // POST add
-  //       const response = await fetch(`${apiUrl}/books`, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(payload),
-  //       });
-  //       if (!response.ok) throw new Error("Failed to add book");
-  //     }
-
-  //     // Refresh book list
-  //     fetchBooks();
-  //     setFormData({ title: "", category: "", publishing_year: "", author: "" });
-  //     setEditingId(null);
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error);
-  //   }
-  // };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setBooks(
-        books.map((b) =>
-          b.id === editingId ? { ...formData, id: editingId } : b
-        )
-      );
-    } else {
-      const newBook = { ...formData, id: books.length + 1 };
-      setBooks([...books, newBook]);
+
+    if (!matchedAuthor) {
+      console.error("Author not found!");
+      return;
     }
-    setFormData({ title: "", category: "", publishing_year: "", author: "" });
-    setEditingId(null);
+
+    const requestBody = {
+      title: formData.title,
+      category: formData.category,
+      publishingYear: parseInt(formData.publishing_year),
+      author: {
+        id: matchedAuthor?.id,
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `${apiUrl}/books${editingId ? `/${editingId}` : ""}`,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to submit");
+
+      await fetchBooks();
+      setFormData({
+        title: "",
+        category: "",
+        publishing_year: "",
+        author: "",
+      });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error submitting book:", error);
+    }
   };
 
   const handleEdit = (book) => {
-    setFormData(book);
-    setEditingId(book.id);
+    setFormData({
+      title: book?.title,
+      category: book?.category,
+      publishing_year: book?.publishing_year,
+      author: book?.author || "",
+    });
+    setEditingId(book?.id);
   };
 
   const handleDelete = async (id) => {
@@ -168,15 +167,21 @@ const BookList = () => {
             />
           </div>
           <div className="col">
-            <input
+            <select
               className="form-control"
-              placeholder="Author"
               value={formData.author}
               onChange={(e) =>
                 setFormData({ ...formData, author: e.target.value })
               }
               required
-            />
+            >
+              <option value="">Author</option>
+              {authors.map((a) => (
+                <option key={a.id} value={a.name}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="col-auto">
             <button type="submit" className="btn btn-primary">
