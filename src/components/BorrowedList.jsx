@@ -17,8 +17,12 @@ const BorrowedList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchRecords = () => {
-    fetch(`${apiUrl}/borrowed`)
+  const fetchRecords = (query = "") => {
+    const url = query
+      ? `${apiUrl}/borrowed/search?query=${encodeURIComponent(query)}`
+      : `${apiUrl}/borrowed`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const formattedRecords = data.map((item) => ({
@@ -55,17 +59,20 @@ const BorrowedList = () => {
     fetchMembers();
   }, []);
 
-  const filtered = records.filter(
-    (r) =>
-      r.book.toLowerCase().includes(search.toLowerCase()) ||
-      r.member.toLowerCase().includes(search.toLowerCase()) ||
-      r.borrow_date.includes(search)
-  );
-  const paginated = filtered.slice(
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchRecords(search);
+      setCurrentPage(1);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const paginatedRecords = records.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const totalPages = Math.ceil(records.length / itemsPerPage);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,35 +84,23 @@ const BorrowedList = () => {
       memberId: parseInt(formData.memberId),
     };
 
-    await fetch(`${apiUrl}/borrowed${editingId ? `/${editingId}` : ""}`, {
-      method: editingId ? "PUT" : "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-      .then((res) => res.json())
-      .then((newItem) => {
-        setRecords((prev) => [
-          ...prev,
-          {
-            id: newItem.id,
-            book: newItem.book?.title || "-",
-            member: newItem.member?.name || "-",
-            borrow_date: newItem.borrowDate,
-            return_date: newItem.returnDate,
-          },
-        ]);
-        fetchRecords();
-        setFormData({
-          bookId: "",
-          memberId: "",
-          borrowDate: "",
-          returnDate: "",
-        });
-        setEditingId(null);
-      })
-      .catch((err) => console.error("Error submitting borrow:", err));
+    try {
+      const res = await fetch(
+        `${apiUrl}/borrowed${editingId ? `/${editingId}` : ""}`,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to submit");
+
+      await fetchRecords();
+      setFormData({ borrowDate: "", returnDate: "", bookId: "", memberId: "" });
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error submitting borrow:", err);
+    }
   };
 
   const handleEdit = (record) => {
@@ -115,24 +110,22 @@ const BorrowedList = () => {
     );
 
     setFormData({
-      bookId: selectedBook ? selectedBook.id : "",
-      memberId: selectedMember ? selectedMember.id : "",
-      borrowDate: record?.borrow_date,
-      returnDate: record?.return_date,
+      bookId: selectedBook?.id || "",
+      memberId: selectedMember?.id || "",
+      borrowDate: record.borrow_date,
+      returnDate: record.return_date,
     });
-    setEditingId(record?.id);
+    setEditingId(record.id);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
-      await fetch(`${apiUrl}/borrowed/${id}`, {
-        method: "DELETE",
-      })
-        .then(() => {
-          setRecords((prev) => prev.filter((r) => r.id !== id));
-          fetchRecords();
-        })
-        .catch((err) => console.error("Error deleting record:", err));
+      try {
+        await fetch(`${apiUrl}/borrowed/${id}`, { method: "DELETE" });
+        fetchRecords(search);
+      } catch (err) {
+        console.error("Error deleting record:", err);
+      }
     }
   };
 
@@ -219,12 +212,12 @@ const BorrowedList = () => {
           </tr>
         </thead>
         <tbody>
-          {paginated.map((r) => (
-            <tr key={r.id}>
-              <td>{r.book}</td>
-              <td>{r.member}</td>
-              <td>{r.borrow_date}</td>
-              <td>{r.return_date}</td>
+          {paginatedRecords.map((record) => (
+            <tr key={record.id}>
+              <td>{record.book}</td>
+              <td>{record.member}</td>
+              <td>{record.borrow_date}</td>
+              <td>{record.return_date}</td>
               <td>
                 <button
                   className="btn btn-sm btn-warning me-2"
@@ -247,8 +240,8 @@ const BorrowedList = () => {
         <ul className="pagination">
           {Array.from({ length: totalPages }, (_, i) => (
             <li
-              className={`page-item ${i + 1 === currentPage ? "active" : ""}`}
               key={i}
+              className={`page-item ${i + 1 === currentPage ? "active" : ""}`}
             >
               <button
                 className="page-link"

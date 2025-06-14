@@ -10,8 +10,12 @@ const AuthorList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchAuthors = () => {
-    fetch(`${apiUrl}/authors`)
+  const fetchAuthors = (query = "") => {
+    const url = query
+      ? `${apiUrl}/authors/search?query=${encodeURIComponent(query)}`
+      : `${apiUrl}/authors`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const formattedAuthor = data.map((author) => ({
@@ -20,29 +24,18 @@ const AuthorList = () => {
         }));
         setAuthors(formattedAuthor);
       })
-      .catch((err) => console.error("Failed to fetch authors:", err));
+      .catch((err) => {
+        console.error("Failed to fetch authors:", err);
+      });
   };
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (search.trim()) {
-        fetch(`${apiUrl}/authors/search?query=${encodeURIComponent(search)}`)
-          .then((res) => res.json())
-          .then((data) => {
-            const formattedSearchAuthor = data.map((author) => ({
-              id: author?.id,
-              name: author?.name,
-            }));
-            setAuthors(formattedSearchAuthor);
-            setCurrentPage(1);
-          })
-          .catch((err) => console.error("Search failed:", err));
-      } else {
-        fetchAuthors();
-      }
-    }, 400);
+    const timeout = setTimeout(() => {
+      fetchAuthors(search);
+      setCurrentPage(1);
+    }, 300);
 
-    return () => clearTimeout(delayDebounce);
+    return () => clearTimeout(timeout);
   }, [search]);
 
   const paginatedAuthors = authors.slice(

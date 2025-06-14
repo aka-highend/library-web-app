@@ -10,33 +10,41 @@ const MemberList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchMembers = () => {
-    fetch(`${apiUrl}/members`)
+  const fetchMembers = (query = "") => {
+    const url = query
+      ? `${apiUrl}/members/search?query=${encodeURIComponent(query)}`
+      : `${apiUrl}/members`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const formattedMembers = data.map((member) => ({
-          id: member?.id || "-",
-          name: member?.name || "-",
-          email: member?.email || "-",
-          phone: member?.phone || "-",
+          id: member?.id,
+          name: member?.name,
+          email: member?.email,
+          phone: member?.phone,
         }));
         setMembers(formattedMembers);
       })
-      .catch((err) => console.error("Failed to fetch members:", err));
+      .catch((err) => {
+        console.error("Failed to fetch members:", err);
+      });
   };
 
   useEffect(() => {
-    fetchMembers();
-  }, []);
+    const timeout = setTimeout(() => {
+      fetchMembers(search);
+      setCurrentPage(1);
+    }, 300);
 
-  const filtered = members.filter((m) =>
-    m.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const paginated = filtered.slice(
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const paginatedMembers = members.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const totalPages = Math.ceil(members.length / itemsPerPage);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -153,7 +161,7 @@ const MemberList = () => {
           </tr>
         </thead>
         <tbody>
-          {paginated.map((member) => (
+          {paginatedMembers.map((member) => (
             <tr key={member.id}>
               <td>{member.name}</td>
               <td>{member.email}</td>

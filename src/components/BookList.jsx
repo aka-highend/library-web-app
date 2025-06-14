@@ -23,8 +23,12 @@ const BookList = () => {
       .catch((err) => console.error("Fetch authors error:", err));
   };
 
-  const fetchBooks = () => {
-    fetch(`${apiUrl}/books`)
+  const fetchBooks = (query = "") => {
+    const url = query
+      ? `${apiUrl}/books/search?query=${encodeURIComponent(query)}`
+      : `${apiUrl}/books`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const formattedBook = data.map((book) => ({
@@ -37,34 +41,20 @@ const BookList = () => {
         }));
         setBooks(formattedBook);
       })
-      .catch((err) => console.error("Failed to fetch books:", err));
+      .catch((err) => {
+        console.error("Failed to fetch books:", err);
+      });
   };
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (search.trim()) {
-        fetch(`${apiUrl}/books/search?query=${encodeURIComponent(search)}`)
-          .then((res) => res.json())
-          .then((data) => {
-            const formattedBookSearch = data.map((book) => ({
-              id: book?.id,
-              title: book?.title,
-              category: book?.category,
-              publishing_year: book?.publishingYear,
-              author: book?.author || "Unknown",
-              authorId: book?.authorId || (book?.author && book?.author.id),
-            }));
-            setBooks(formattedBookSearch);
-            setCurrentPage(1);
-          })
-          .catch((err) => console.error("Search failed:", err));
-      } else {
-        fetchBooks();
-        fetchAuthors();
-      }
-    }, 400);
+    const timeout = setTimeout(() => {
+      fetchBooks(search);
+      fetchAuthors();
 
-    return () => clearTimeout(delayDebounce);
+      setCurrentPage(1);
+    }, 300);
+
+    return () => clearTimeout(timeout);
   }, [search]);
 
   const paginatedBooks = books.slice(
