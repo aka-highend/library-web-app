@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const initialMembers = [
-  { id: 1, name: "Jack", email: "jack@email.com", phone: "123-456" },
-  { id: 2, name: "Jill", email: "jill@email.com", phone: "789-012" },
-];
+import { apiUrl } from "../utils/constants";
 
 const MemberList = () => {
-  const [members, setMembers] = useState(initialMembers);
+  const [members, setMembers] = useState([]);
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const fetchMembers = () => {
+    fetch(`${apiUrl}/members`)
+      .then((res) => res.json())
+      .then((data) => {
+        const formattedMembers = data.map((member) => ({
+          id: member?.id || "-",
+          name: member?.name || "-",
+          email: member?.email || "-",
+          phone: member?.phone || "-",
+        }));
+        setMembers(formattedMembers);
+      })
+      .catch((err) => console.error("Failed to fetch members:", err));
+  };
+
+  useEffect(() => {
+    fetchMembers();
+  }, []);
 
   const filtered = members.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase())
@@ -22,27 +38,58 @@ const MemberList = () => {
   );
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setMembers(
-        members.map((m) =>
-          m.id === editingId ? { ...formData, id: editingId } : m
-        )
+
+    const requestBody = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    };
+
+    try {
+      const response = await fetch(
+        `${apiUrl}/members${editingId ? `/${editingId}` : ""}`,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
       );
-    } else {
-      setMembers([...members, { ...formData, id: members.length + 1 }]);
+
+      if (!response.ok) throw new Error("Failed to submit new member");
+      await fetchMembers();
+      setFormData({ name: "", email: "", phone: "" });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error submitting member: ", error);
     }
-    setFormData({ name: "", email: "", phone: "" });
-    setEditingId(null);
   };
 
   const handleEdit = (member) => {
-    setFormData(member);
-    setEditingId(member.id);
+    setFormData({
+      name: member?.name,
+      email: member?.email,
+      phone: member?.phone,
+    });
+    setEditingId(member?.id);
   };
 
-  const handleDelete = (id) => setMembers(members.filter((m) => m.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/members/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete member");
+
+      fetchMembers();
+    } catch (error) {
+      console.error("Error deleting member: ", error);
+    }
+  };
 
   return (
     <div>

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { apiUrl } from "../utils/constants";
 
 const BookList = () => {
-  const [authors, setAuthors] = useState([]);
   const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({
     title: "",
