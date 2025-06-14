@@ -6,10 +6,10 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import BookList from "./components/BookList";
-import AuthorList from "./components/AuthorList";
-import BorrowedList from "./components/BorrowedList";
-import MemberList from "./components/MemberList";
+import BookList from "./pages/BookList";
+import AuthorList from "./pages/AuthorList";
+import BorrowedList from "./pages/BorrowedList";
+import MemberList from "./pages/MemberList";
 
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "remixicon/fonts/remixicon.css";
