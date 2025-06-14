@@ -109,9 +109,14 @@ const BorrowedList = () => {
   };
 
   const handleEdit = (record) => {
+    const selectedBook = books.find((book) => book.title === record.book);
+    const selectedMember = members.find(
+      (member) => member.name === record.member
+    );
+
     setFormData({
-      bookId: record?.book?.id,
-      memberId: record?.member?.id,
+      bookId: selectedBook ? selectedBook.id : "",
+      memberId: selectedMember ? selectedMember.id : "",
       borrowDate: record?.borrow_date,
       returnDate: record?.return_date,
     });

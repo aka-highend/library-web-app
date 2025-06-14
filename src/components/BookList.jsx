@@ -109,6 +109,11 @@ const BookList = () => {
   };
 
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this book?"
+    );
+    if (!confirmDelete) return;
+
     try {
       const response = await fetch(`${apiUrl}/books/${id}`, {
         method: "DELETE",
@@ -169,7 +174,7 @@ const BookList = () => {
           </div>
           <div className="col">
             <select
-              className="form-control"
+              className="form-select"
               value={formData.author}
               onChange={(e) =>
                 setFormData({ ...formData, author: e.target.value })
@@ -177,9 +182,9 @@ const BookList = () => {
               required
             >
               <option value="">Author</option>
-              {authors.map((a) => (
-                <option key={a.id} value={a.name}>
-                  {a.name}
+              {authors.map((author) => (
+                <option key={author.id} value={author.name}>
+                  {author.name}
                 </option>
               ))}
             </select>

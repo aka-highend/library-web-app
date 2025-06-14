@@ -78,6 +78,11 @@ const MemberList = () => {
   };
 
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this member?"
+    );
+    if (!confirmDelete) return;
+
     try {
       const response = await fetch(`${apiUrl}/members/${id}`, {
         method: "DELETE",
