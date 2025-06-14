@@ -110,15 +110,26 @@ const BorrowedList = () => {
 
   const handleEdit = (record) => {
     setFormData({
-      bookId: record.book.id,
-      memberId: record.member.id,
-      borrowDate: record.borrow_date,
-      returnDate: record.return_date,
+      bookId: record?.book?.id,
+      memberId: record?.member?.id,
+      borrowDate: record?.borrow_date,
+      returnDate: record?.return_date,
     });
     setEditingId(record?.id);
   };
 
-  const handleDelete = (id) => setRecords(records.filter((r) => r.id !== id));
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      await fetch(`${apiUrl}/borrowed/${id}`, {
+        method: "DELETE",
+      })
+        .then(() => {
+          setRecords((prev) => prev.filter((r) => r.id !== id));
+          fetchRecords();
+        })
+        .catch((err) => console.error("Error deleting record:", err));
+    }
+  };
 
   return (
     <div>
