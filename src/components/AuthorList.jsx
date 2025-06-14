@@ -24,17 +24,32 @@ const AuthorList = () => {
   };
 
   useEffect(() => {
-    fetchAuthors();
-  }, []);
+    const delayDebounce = setTimeout(() => {
+      if (search.trim()) {
+        fetch(`${apiUrl}/authors/search?query=${encodeURIComponent(search)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const formattedSearchAuthor = data.map((author) => ({
+              id: author?.id,
+              name: author?.name,
+            }));
+            setAuthors(formattedSearchAuthor);
+            setCurrentPage(1);
+          })
+          .catch((err) => console.error("Search failed:", err));
+      } else {
+        fetchAuthors();
+      }
+    }, 400);
 
-  const filtered = authors.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const paginated = filtered.slice(
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
+
+  const paginatedAuthors = authors.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const totalPages = Math.ceil(authors.length / itemsPerPage);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,7 +134,7 @@ const AuthorList = () => {
           </tr>
         </thead>
         <tbody>
-          {paginated.map((author) => (
+          {paginatedAuthors.map((author) => (
             <tr key={author.id}>
               <td>{author.name}</td>
               <td>

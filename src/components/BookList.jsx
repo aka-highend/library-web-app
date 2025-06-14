@@ -16,6 +16,13 @@ const BookList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const fetchAuthors = () => {
+    fetch(`${apiUrl}/authors`)
+      .then((res) => res.json())
+      .then((data) => setAuthors(data))
+      .catch((err) => console.error("Fetch authors error:", err));
+  };
+
   const fetchBooks = () => {
     fetch(`${apiUrl}/books`)
       .then((res) => res.json())
@@ -34,21 +41,37 @@ const BookList = () => {
   };
 
   useEffect(() => {
-    fetchBooks();
-    fetch(`${apiUrl}/authors`)
-      .then((res) => res.json())
-      .then((data) => setAuthors(data))
-      .catch((err) => console.error("Failed to fetch authors:", err));
-  }, []);
+    const delayDebounce = setTimeout(() => {
+      if (search.trim()) {
+        fetch(`${apiUrl}/books/search?query=${encodeURIComponent(search)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const formattedBookSearch = data.map((book) => ({
+              id: book?.id,
+              title: book?.title,
+              category: book?.category,
+              publishing_year: book?.publishingYear,
+              author: book?.author || "Unknown",
+              authorId: book?.authorId || (book?.author && book?.author.id),
+            }));
+            setBooks(formattedBookSearch);
+            setCurrentPage(1);
+          })
+          .catch((err) => console.error("Search failed:", err));
+      } else {
+        fetchBooks();
+        fetchAuthors();
+      }
+    }, 400);
 
-  const filteredBooks = books.filter((b) =>
-    b.title.toLowerCase().includes(search.toLowerCase())
-  );
-  const paginatedBooks = filteredBooks.slice(
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
+
+  const paginatedBooks = books.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+  const totalPages = Math.ceil(books.length / itemsPerPage);
 
   const matchedAuthor = authors.find(
     (a) => a.name.toLowerCase() === formData.author.toLowerCase()
