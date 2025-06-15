@@ -1,0 +1,37 @@
+.custom-navbar {
+  background-color: #000; /* Black background */
+  padding: 1rem 0;
+}
+
+.custom-navbar .navbar-brand {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.custom-navbar .nav-link {
+  color: #fff;
+  transition: color 0.3s;
+}
+
+.custom-navbar .nav-link:hover {
+  color: #ccc;
+}
+
+@media (max-width: 768px) {
+  .custom-navbar .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .custom-navbar ul.nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .custom-navbar .navbar-brand {
+    font-size: 1.25rem;
+  }
+}

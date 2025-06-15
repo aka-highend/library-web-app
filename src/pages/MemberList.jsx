@@ -83,12 +83,7 @@ const MemberList = () => {
                   {borrowedBooksByMember[member.id]?.length > 0 ? (
                     <ul className="mb-0 ps-3">
                       {borrowedBooksByMember[member.id].map((book) => (
-                        <li key={book.id}>
-                          {book.title}{" "}
-                          <small className="text-muted">
-                            ({book.borrowDate} → {book.returnDate})
-                          </small>
-                        </li>
+                        <li key={book.id}>{book.title}</li>
                       ))}
                     </ul>
                   ) : (
