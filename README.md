@@ -1,6 +1,6 @@
 ## Overview
 
-Library web app for managing authors, members, borrowed records, and books in a library.
+Library web app for managing authors, members, borrowed records, and books in a library. Built using React and Vite
 
 
 ### Installing
