@@ -20,57 +20,69 @@ const AuthorList = () => {
   } = useAuthorList(apiUrl);
 
   return (
-    <div>
-      <h2>Authors</h2>
+    <div className="container py-4">
+      <h2 className="mb-3">Authors</h2>
+
       <input
         className="form-control mb-3"
+        type="text"
         placeholder="Search author..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <form onSubmit={handleSubmit} className="mb-4 d-flex gap-2">
+
+      <form
+        onSubmit={handleSubmit}
+        className="d-flex gap-2 flex-column flex-sm-row mb-4"
+      >
         <input
           className="form-control"
-          placeholder="Name"
+          placeholder="Author name"
           value={formData.name}
           onChange={(e) => setFormData({ name: e.target.value })}
           required
         />
-        <button className="btn btn-primary">
+        <button className="btn btn-dark" type="submit">
           {editingId ? "Update" : "Add"}
         </button>
       </form>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedAuthors.map((author) => (
-            <tr key={author.id}>
-              <td>{author.name}</td>
-              <td>
-                <button
-                  className="btn btn-sm btn-warning me-2"
-                  onClick={() => handleEdit(author)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(author.id)}
-                >
-                  Delete
-                </button>
-              </td>
+
+      <div className="table-responsive">
+        <table className="table table-bordered">
+          <thead className="table-light">
+            <tr>
+              <th>Name</th>
+              <th style={{ width: "130px" }}>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <nav>
-        <ul className="pagination">
+          </thead>
+          <tbody>
+            {paginatedAuthors.map((author) => (
+              <tr key={author.id}>
+                <td>{author.name}</td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-sm btn-outline-warning w-100"
+                      onClick={() => handleEdit(author)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger w-100"
+                      onClick={() => handleDelete(author.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <nav className="mt-3">
+        <ul className="pagination justify-content-center">
           {Array.from({ length: totalPages }, (_, i) => (
             <li
               className={`page-item ${i + 1 === currentPage ? "active" : ""}`}
