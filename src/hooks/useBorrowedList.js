@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
-const BorrowedList = (apiUrl) => {
+const useBorrowedList = (apiUrl) => {
   const [records, setRecords] = useState([]);
   const [books, setBooks] = useState([]);
   const [members, setMembers] = useState([]);
   const [search, setSearch] = useState("");
+  const [filterBorrowDate, setFilterBorrowDate] = useState("");
+  const [filterReturnDate, setFilterReturnDate] = useState("");
   const [formData, setFormData] = useState({
     borrowDate: "",
     returnDate: "",
@@ -15,9 +17,16 @@ const BorrowedList = (apiUrl) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchRecords = (query = "") => {
-    const url = query
-      ? `${apiUrl}/borrowed/search?query=${encodeURIComponent(query)}`
+  const fetchRecords = (query = "", borrowDate = "", returnDate = "") => {
+    const params = new URLSearchParams();
+
+    params.append("bookTitle", query);
+    params.append("memberName", query);
+    if (borrowDate) params.append("borrowDate", borrowDate);
+    if (returnDate) params.append("returnDate", returnDate);
+
+    const url = params.toString()
+      ? `${apiUrl}/borrowed/search?${params.toString()}`
       : `${apiUrl}/borrowed`;
 
     fetch(url)
@@ -59,12 +68,12 @@ const BorrowedList = (apiUrl) => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      fetchRecords(search);
+      fetchRecords(search, filterBorrowDate, filterReturnDate);
       setCurrentPage(1);
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [search]);
+  }, [search, filterBorrowDate, filterReturnDate]);
 
   const paginatedRecords = records.slice(
     (currentPage - 1) * itemsPerPage,
@@ -143,7 +152,11 @@ const BorrowedList = (apiUrl) => {
     handleDelete,
     books,
     members,
+    filterBorrowDate,
+    setFilterBorrowDate,
+    filterReturnDate,
+    setFilterReturnDate,
   };
 };
 
-export default BorrowedList;
+export default useBorrowedList;

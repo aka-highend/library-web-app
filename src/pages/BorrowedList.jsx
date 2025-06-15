@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { apiUrl } from "../utils/constants";
 import useBorrowedList from "../hooks/useBorrowedList";
@@ -8,6 +8,10 @@ const BorrowedList = () => {
     paginatedRecords,
     search,
     setSearch,
+    filterBorrowDate,
+    setFilterBorrowDate,
+    filterReturnDate,
+    setFilterReturnDate,
     formData,
     setFormData,
     editingId,
@@ -24,12 +28,35 @@ const BorrowedList = () => {
   return (
     <div>
       <h2>Borrowed Books</h2>
-      <input
-        className="form-control mb-3"
-        placeholder="Search by book title, member, borrow date..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="row mb-3">
+        <div className="col">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search by title or member..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="col">
+          <input
+            type="date"
+            className="form-control"
+            value={filterBorrowDate}
+            onChange={(e) => setFilterBorrowDate(e.target.value)}
+            placeholder="Search borrow date"
+          />
+        </div>
+        <div className="col">
+          <input
+            type="date"
+            className="form-control"
+            value={filterReturnDate}
+            onChange={(e) => setFilterReturnDate(e.target.value)}
+            placeholder="Search return date"
+          />
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="mb-4 row g-2">
         <div className="col">
           <select
@@ -96,8 +123,8 @@ const BorrowedList = () => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th>Book</th>
             <th>Member</th>
+            <th>Book</th>
             <th>Borrowed</th>
             <th>Return</th>
             <th>Actions</th>
@@ -106,8 +133,8 @@ const BorrowedList = () => {
         <tbody>
           {paginatedRecords.map((record) => (
             <tr key={record.id}>
-              <td>{record.book}</td>
               <td>{record.member}</td>
+              <td>{record.book}</td>
               <td>{record.borrow_date}</td>
               <td>{record.return_date}</td>
               <td>
