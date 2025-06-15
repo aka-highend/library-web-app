@@ -120,7 +120,13 @@ const useMemberList = (apiUrl) => {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete member");
+      if (!response.ok) {
+        window.alert(
+          "Cannot delete member with borrowed books due to its association. Please return the books first."
+        );
+        return;
+      }
+
       fetchMembers();
     } catch (error) {
       console.error("Error deleting member: ", error);

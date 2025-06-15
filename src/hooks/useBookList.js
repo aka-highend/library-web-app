@@ -129,7 +129,13 @@ const useBookList = (apiUrl) => {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete book");
+      if (!response.ok) {
+        window.alert(
+          "Cannot delete book due to associative relation with authors or borrowed records."
+        );
+        return;
+      }
+
       fetchBooks();
     } catch (error) {
       console.error("Error deleting book:", error);
