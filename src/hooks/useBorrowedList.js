@@ -93,7 +93,9 @@ const useBorrowedList = (apiUrl) => {
 
     try {
       const res = await fetch(
-        `${apiUrl}/borrowed${editingId ? `/${editingId}` : ""}`,
+        `${apiUrl}${
+          editingId ? `/edit-borrowed/${editingId}` : "/add-borrowed"
+        }`,
         {
           method: editingId ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -128,7 +130,7 @@ const useBorrowedList = (apiUrl) => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
-        await fetch(`${apiUrl}/borrowed/${id}`, { method: "DELETE" });
+        await fetch(`${apiUrl}/delete-borrowed/${id}`, { method: "DELETE" });
         fetchRecords(search);
       } catch (err) {
         console.error("Error deleting record:", err);

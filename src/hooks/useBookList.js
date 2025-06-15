@@ -83,7 +83,7 @@ const useBookList = (apiUrl) => {
 
     try {
       const response = await fetch(
-        `${apiUrl}/books${editingId ? `/${editingId}` : ""}`,
+        `${apiUrl}${editingId ? `/edit-book/${editingId}` : "/add-book"}`,
         {
           method: editingId ? "PUT" : "POST",
           headers: {
@@ -125,7 +125,7 @@ const useBookList = (apiUrl) => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${apiUrl}/books/${id}`, {
+      const response = await fetch(`${apiUrl}/delete-book/${id}`, {
         method: "DELETE",
       });
 

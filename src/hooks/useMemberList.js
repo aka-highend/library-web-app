@@ -81,7 +81,7 @@ const useMemberList = (apiUrl) => {
 
     try {
       const response = await fetch(
-        `${apiUrl}/members${editingId ? `/${editingId}` : ""}`,
+        `${apiUrl}${editingId ? `/edit-member/${editingId}` : "/add-member"}`,
         {
           method: editingId ? "PUT" : "POST",
           headers: {
@@ -116,7 +116,7 @@ const useMemberList = (apiUrl) => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${apiUrl}/members/${id}`, {
+      const response = await fetch(`${apiUrl}/delete-member/${id}`, {
         method: "DELETE",
       });
 

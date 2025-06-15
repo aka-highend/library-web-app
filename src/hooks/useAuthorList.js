@@ -52,7 +52,7 @@ const useAuthorList = (apiUrl) => {
 
     try {
       const response = await fetch(
-        `${apiUrl}/authors${editingId ? `/${editingId}` : ""}`,
+        `${apiUrl}${editingId ? `/edit-author/${editingId}` : "/add-author"}`,
         {
           method: editingId ? "PUT" : "POST",
           headers: {
@@ -86,7 +86,7 @@ const useAuthorList = (apiUrl) => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${apiUrl}/authors/${id}`, {
+      const response = await fetch(`${apiUrl}/delete-author/${id}`, {
         method: "DELETE",
       });
 
