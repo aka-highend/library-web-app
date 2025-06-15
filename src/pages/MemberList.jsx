@@ -6,6 +6,7 @@ import { apiUrl } from "../utils/constants";
 const MemberList = () => {
   const {
     paginatedMembers,
+    borrowedBooksByMember,
     search,
     setSearch,
     formData,
@@ -68,6 +69,7 @@ const MemberList = () => {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>Borrowed Books</th>
               <th style={{ width: "130px" }}>Actions</th>
             </tr>
           </thead>
@@ -77,6 +79,22 @@ const MemberList = () => {
                 <td>{member.name}</td>
                 <td>{member.email}</td>
                 <td>{member.phone}</td>
+                <td>
+                  {borrowedBooksByMember[member.id]?.length > 0 ? (
+                    <ul className="mb-0 ps-3">
+                      {borrowedBooksByMember[member.id].map((book) => (
+                        <li key={book.id}>
+                          {book.title}{" "}
+                          <small className="text-muted">
+                            ({book.borrowDate} → {book.returnDate})
+                          </small>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-muted">No books</span>
+                  )}
+                </td>
                 <td>
                   <div className="d-flex gap-2">
                     <button

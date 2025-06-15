@@ -2,31 +2,53 @@ import { useEffect, useState } from "react";
 
 const useMemberList = (apiUrl) => {
   const [members, setMembers] = useState([]);
+  const [borrowedBooksByMember, setBorrowedBooksByMember] = useState({});
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchMembers = (query = "") => {
+  const fetchMembers = async (query = "") => {
     const url = query
       ? `${apiUrl}/members/search?query=${encodeURIComponent(query)}`
       : `${apiUrl}/members`;
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        const formattedMembers = data.map((member) => ({
-          id: member?.id,
-          name: member?.name,
-          email: member?.email,
-          phone: member?.phone,
-        }));
-        setMembers(formattedMembers);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch members:", err);
-      });
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const formattedMembers = data.map((member) => ({
+        id: member?.id,
+        name: member?.name,
+        email: member?.email,
+        phone: member?.phone,
+      }));
+      setMembers(formattedMembers);
+    } catch (err) {
+      console.error("Failed to fetch members:", err);
+    }
+  };
+
+  const fetchBorrowedBooks = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/borrowed`);
+      const data = await res.json();
+
+      const grouped = data.reduce((acc, item) => {
+        const memberId = item.member?.id;
+        if (!acc[memberId]) acc[memberId] = [];
+        acc[memberId].push({
+          id: item.id,
+          title: item.book?.title,
+          borrowDate: item.borrowDate,
+          returnDate: item.returnDate,
+        });
+        return acc;
+      }, {});
+      setBorrowedBooksByMember(grouped);
+    } catch (err) {
+      console.error("Failed to fetch borrowed books:", err);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +59,10 @@ const useMemberList = (apiUrl) => {
 
     return () => clearTimeout(timeout);
   }, [search]);
+
+  useEffect(() => {
+    fetchBorrowedBooks();
+  }, []);
 
   const paginatedMembers = members.slice(
     (currentPage - 1) * itemsPerPage,
@@ -103,6 +129,7 @@ const useMemberList = (apiUrl) => {
 
   return {
     paginatedMembers,
+    borrowedBooksByMember,
     totalPages,
     search,
     setSearch,
