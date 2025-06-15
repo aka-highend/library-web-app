@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,36 +20,76 @@ import "bootstrap/dist/js/bootstrap.min.js";
 import "./App.css";
 
 const App = () => {
+  const [isNavOpen, setIsNavOpen] = useState(false);
+
+  const toggleNav = () => {
+    setIsNavOpen(!isNavOpen);
+  };
+
+  const closeNav = () => {
+    setIsNavOpen(false);
+  };
+
   return (
     <>
       <Router>
         <header className="custom-navbar">
-          <div className="container d-flex flex-wrap justify-content-between align-items-center">
-            <h1 className="navbar-brand mb-0">Library</h1>
-            <ul className="nav gap-3 align-items-center">
+          <div className="container d-flex justify-content-between align-items-center">
+            <div className="main-header d-flex justify-content-between align-items-center">
+              <h1 className="navbar-brand mb-0">Library</h1>
+              <span
+                className="burger d-md-none btn text-white"
+                onClick={toggleNav}
+                aria-label="Toggle navigation"
+              >
+                &#9776;
+              </span>
+            </div>
+            <ul
+              className={`nav gap-3 align-items-center mobile-nav ${
+                isNavOpen ? "show" : ""
+              }`}
+            >
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/books">
+                <Link
+                  className="nav-link text-white"
+                  to="/books"
+                  onClick={closeNav}
+                >
                   Books
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/authors">
+                <Link
+                  className="nav-link text-white"
+                  to="/authors"
+                  onClick={closeNav}
+                >
                   Authors
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/members">
+                <Link
+                  className="nav-link text-white"
+                  to="/members"
+                  onClick={closeNav}
+                >
                   Members
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/borrowed-books">
+                <Link
+                  className="nav-link text-white"
+                  to="/borrowed-books"
+                  onClick={closeNav}
+                >
                   Borrowed
                 </Link>
               </li>
             </ul>
           </div>
         </header>
+
         <div className="container">
           <Routes>
             <Route path="/books" element={<BookList />} />
