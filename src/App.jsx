@@ -53,19 +53,19 @@ const App = () => {
               <li className="nav-item">
                 <Link
                   className="nav-link text-white"
-                  to="/books"
+                  to="/authors"
                   onClick={closeNav}
                 >
-                  Books
+                  Authors
                 </Link>
               </li>
               <li className="nav-item">
                 <Link
                   className="nav-link text-white"
-                  to="/authors"
+                  to="/books"
                   onClick={closeNav}
                 >
-                  Authors
+                  Books
                 </Link>
               </li>
               <li className="nav-item">

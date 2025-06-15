@@ -52,13 +52,30 @@ const AuthorList = () => {
           <thead className="table-light">
             <tr>
               <th>Name</th>
+              <th>Books</th>
               <th style={{ width: "130px" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {paginatedAuthors.map((author) => (
-              <tr key={author.id}>
-                <td>{author.name}</td>
+              <tr key={author?.id}>
+                <td>{author?.name}</td>
+                <td>
+                  {author?.books?.length > 0 ? (
+                    <ul className="mb-0 ps-3">
+                      {author?.books?.map((book) => (
+                        <li key={book.id}>
+                          {book.title}{" "}
+                          <small className="text-muted">
+                            ({book.publishingYear})
+                          </small>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-muted">No books</span>
+                  )}
+                </td>
                 <td>
                   <div className="d-flex gap-2">
                     <button

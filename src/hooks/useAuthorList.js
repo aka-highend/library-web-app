@@ -19,6 +19,7 @@ const useAuthorList = (apiUrl) => {
         const formattedAuthor = data.map((author) => ({
           id: author?.id,
           name: author?.name,
+          books: author?.books || [],
         }));
         setAuthors(formattedAuthor);
       })
