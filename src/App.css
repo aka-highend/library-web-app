@@ -41,9 +41,9 @@
   max-height: 500px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 770px) {
   .burger {
-    display: none;
+    display: none !important;
   }
 
   .mobile-nav {
@@ -53,6 +53,38 @@
     margin-top: 0;
     max-height: none;
     margin-left: auto;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 770px) {
+  .custom-navbar .container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .custom-navbar .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .main-header {
+    width: 100% !important;
+  }
+
+  .burger {
+    margin-left: auto;
+  }
+
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .mobile-nav.show {
+    display: flex;
   }
 }
 

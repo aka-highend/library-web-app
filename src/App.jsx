@@ -38,7 +38,7 @@ const App = () => {
             <div className="main-header d-flex justify-content-between align-items-center">
               <h1 className="navbar-brand mb-0">Library</h1>
               <span
-                className="burger d-md-none btn text-white"
+                className="burger btn text-white"
                 onClick={toggleNav}
                 aria-label="Toggle navigation"
               >
